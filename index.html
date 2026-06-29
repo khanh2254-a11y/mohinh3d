@@ -47,7 +47,7 @@
                 <h1 class="text-sm md:text-base font-bold tracking-tight text-white flex items-center gap-1.5">
                     MÔ PHỎNG HÌNH HỌC 3D <span class="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.2 rounded-full">Câu 3 (Mã đề 101)</span>
                 </h1>
-                <p class="text-[11px] text-slate-400">Trực quan hoá mối liên hệ khoảng cách từ máy bay đến vành đai bảo vệ</p>
+                <p class="text-[11px] text-slate-400">Trực quan hoá mối liên hệ khoảng cách từ máy bay đến vành đai bảo vệ với trục Oz hướng thẳng đứng</p>
             </div>
         </div>
         <div class="flex items-center space-x-4 mt-1 sm:mt-0">
@@ -61,7 +61,7 @@
     <!-- Main Container -->
     <div class="flex-1 flex flex-col lg:flex-row relative overflow-hidden">
         
-        <!-- Left Panel: Controls & Analysis (Shrunk from 420px to 320px for larger 3D space) -->
+        <!-- Left Panel: Controls & Analysis (320px width) -->
         <div class="w-full lg:w-[320px] bg-slate-900/90 backdrop-blur-md border-r border-slate-800 flex flex-col z-10 max-h-[40vh] lg:max-h-[calc(100vh-55px)] overflow-y-auto">
             
             <!-- Tab Navigation -->
@@ -81,7 +81,7 @@
                 <div class="bg-slate-950/50 rounded-xl p-3 border border-slate-800 space-y-3">
                     <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                         <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                        Trình điều khiển mô phỏng
+                        Trình điều khiển máy bay
                     </h2>
 
                     <!-- Play/Pause & Reset -->
@@ -125,6 +125,71 @@
                     </div>
                 </div>
 
+                <!-- NEW: Camera Navigation Pad & Auto-Rotate -->
+                <div class="space-y-2 bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
+                    <div class="flex justify-between items-center text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                        <span>Điều chỉnh hướng Camera</span>
+                        <span class="text-indigo-400 font-mono">3D Pad</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-12 gap-3 items-center">
+                        <!-- D-Pad Arrows -->
+                        <div class="col-span-7 grid grid-cols-3 gap-1.5 justify-center">
+                            <div></div>
+                            <button class="nav-btn p-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded flex justify-center active:scale-95 transition" data-dir="up" title="Xoay camera lên">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                            </button>
+                            <div></div>
+                            
+                            <button class="nav-btn p-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded flex justify-center active:scale-95 transition" data-dir="left" title="Xoay camera trái">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                            </button>
+                            <div class="bg-slate-900 border border-slate-800/80 rounded flex items-center justify-center text-[9px] text-slate-500 font-bold uppercase select-none">
+                                Cam
+                            </div>
+                            <button class="nav-btn p-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded flex justify-center active:scale-95 transition" data-dir="right" title="Xoay camera phải">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                            
+                            <div></div>
+                            <button class="nav-btn p-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded flex justify-center active:scale-95 transition" data-dir="down" title="Xoay camera xuống">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div></div>
+                        </div>
+                        
+                        <!-- Zoom Buttons -->
+                        <div class="col-span-5 flex flex-col gap-1.5">
+                            <button class="nav-btn py-1.5 px-2 bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-200 rounded text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition" data-dir="zoomIn">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Zoom +
+                            </button>
+                            <button class="nav-btn py-1.5 px-2 bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-200 rounded text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition" data-dir="zoomOut">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg> Zoom -
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Auto rotate Toggle & Speed -->
+                    <div class="pt-2 border-t border-slate-800/60 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                                Tự động xoay quanh Oz
+                            </label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="auto-rotate-toggle" class="sr-only peer" checked>
+                                <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </label>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[9px] text-slate-500 font-medium">
+                                <span>Tốc độ xoay</span>
+                                <span id="rotate-speed-val" class="text-indigo-400 font-mono">1.0x</span>
+                            </div>
+                            <input id="rotate-speed-slider" type="range" min="0.1" max="4.0" step="0.1" value="1.0" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Live Geometry Coords & Calculations -->
                 <div class="space-y-3">
                     <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -132,7 +197,7 @@
                         Thông số thời gian thực
                     </h2>
 
-                    <!-- Live Coordinate Cards (Optimized layout) -->
+                    <!-- Live Coordinate Cards -->
                     <div class="flex flex-col gap-2">
                         <div class="bg-slate-900 px-2.5 py-2 rounded-lg border border-slate-800 flex justify-between items-center">
                             <span class="text-[9px] text-slate-400 font-medium">MÁY BAY P</span>
@@ -147,7 +212,7 @@
                     <!-- Distance Gauge -->
                     <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col justify-center items-center text-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-emerald-500/5 pointer-events-none"></div>
-                        <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Khoảng Cách Thực Tế</span>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Khoảng Cách Thực Tế (d)</span>
                         <div class="flex items-baseline space-x-1">
                             <span id="distance-meter" class="text-3xl font-extrabold text-white tracking-tight mono-font animate-pulse">50.0</span>
                             <span class="text-base font-bold text-indigo-400">mét</span>
@@ -165,11 +230,11 @@
                 <div class="space-y-2">
                     <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                         <svg class="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        Góc quan sát Camera
+                        Cài đặt hướng nhìn nhanh
                     </h2>
                     <div class="grid grid-cols-3 gap-1">
                         <button class="cam-btn py-1.5 text-[10px] font-medium rounded bg-slate-800 text-slate-300 hover:bg-slate-700" data-view="isometric">
-                            Mặc định
+                            Góc 3D xéo
                         </button>
                         <button class="cam-btn py-1.5 text-[10px] font-medium rounded bg-slate-800 text-slate-300 hover:bg-slate-700" data-view="top">
                             Từ trên (Oxy)
@@ -234,7 +299,7 @@
 
             <!-- Footer of panel -->
             <div class="p-3 border-t border-slate-800 bg-slate-950/40 text-[10px] text-slate-500 text-center">
-                Dùng chuột trái để xoay • chuột phải để kéo • cuộn để thu phóng
+                Xoay chuột trái • chuột phải để kéo • cuộn để thu phóng • dùng phím trên Pad để điều hướng nhanh
             </div>
         </div>
 
@@ -246,15 +311,17 @@
             <div class="absolute bottom-6 right-6 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-lg p-3 text-xs space-y-1.5 shadow-xl pointer-events-none z-10">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded bg-red-600 inline-block"></span>
-                    <span class="font-medium text-slate-200">Trục X (Đỏ)</span>
+                    <span class="font-medium text-slate-200">Trục X (Đỏ) - Hoành độ</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded bg-green-600 inline-block"></span>
-                    <span class="font-medium text-slate-200">Trục Y (Xanh lá)</span>
+                    <span class="font-medium text-slate-200">Trục Y (Xanh lá) - Tung độ</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded bg-blue-600 inline-block"></span>
-                    <span class="font-medium text-slate-200">Trục Z (Xanh dương)</span>
+                    <span class="font-medium text-slate-200 font-bold text-sky-400 flex items-center gap-1">
+                        Trục Z (Xanh dương) - Oz cao độ thẳng đứng
+                    </span>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-1.5 rounded bg-cyan-400 inline-block"></span>
@@ -314,6 +381,9 @@
         }
 
         const camera = new THREE.PerspectiveCamera(45, initWidth / initHeight, 0.1, 1000);
+        // CẤU HÌNH: Đặt trục Z hướng thẳng đứng lên trời trước khi khởi tạo OrbitControls!
+        camera.up.set(0, 0, 1);
+
         const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(initWidth, initHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -332,7 +402,7 @@
         // Giới hạn thu phóng để tránh lạc góc nhìn
         controls.minDistance = 5;           // Không cho phép tiến quá sát lọt vào trong lòng vật thể
         controls.maxDistance = 60;          // Không cho phép lùi ra quá xa biến mất mô hình
-        controls.maxPolarAngle = Math.PI / 2 - 0.01; // Không cho phép xoay camera chui xuống dưới lòng đất
+        controls.maxPolarAngle = Math.PI / 2 - 0.01; // Không cho phép xoay camera chui xuống dưới lòng đất Oxy
 
         // Căn lề mục tiêu camera mặc định
         controls.target.set(8, 5, 2);
@@ -344,13 +414,13 @@
         scene.add(ambientLight);
 
         const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(20, 40, 20);
+        dirLight.position.set(20, 20, 40);
         dirLight.castShadow = true;
         scene.add(dirLight);
 
         // Grid & Coordinate Helper
         const gridHelper = new THREE.GridHelper(30, 30, 0x334155, 0x1e293b);
-        gridHelper.rotation.x = Math.PI / 2; // Nằm phẳng trên mặt phẳng Oxy
+        gridHelper.rotation.x = Math.PI / 2; // Nằm phẳng trên mặt phẳng Oxy (vì Z là Up)
         scene.add(gridHelper);
 
         // Arrows for Axes
@@ -362,7 +432,35 @@
         scene.add(arrowY);
         scene.add(arrowZ);
 
-        // Protective ring mesh (Vành đai bảo vệ)
+        // --- NEW: Tạo nhãn 3D động xoay theo Camera cho các trục & Điểm ---
+        function createAxisLabel(text, position, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = color;
+            ctx.font = 'bold 44px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 32, 32);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(material);
+            sprite.position.copy(position);
+            sprite.scale.set(1.4, 1.4, 1);
+            return sprite;
+        }
+
+        scene.add(createAxisLabel('x', new THREE.Vector3(16.8, 0, 0), '#ef4444'));
+        scene.add(createAxisLabel('y', new THREE.Vector3(0, 16.8, 0), '#22c55e'));
+        scene.add(createAxisLabel('z', new THREE.Vector3(0, 0, 10.8), '#3b82f6'));
+        scene.add(createAxisLabel('O', new THREE.Vector3(-0.6, -0.6, -0.6), '#94a3b8'));
+        scene.add(createAxisLabel('M', M.clone().add(new THREE.Vector3(0, 0, 0.8)), '#f97316'));
+        scene.add(createAxisLabel('N', N.clone().add(new THREE.Vector3(0, 0, 0.8)), '#f97316'));
+        scene.add(createAxisLabel('Q', Q.clone().add(new THREE.Vector3(0, 0, 0.8)), '#e11d48'));
+
+        // Protective ring mesh (Vành đai bảo vệ nằm thẳng trên XY vì Z là Up)
         const ringGeom = new THREE.RingGeometry(ringRadius - 0.06, ringRadius + 0.06, 128);
         const ringMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee, side: THREE.DoubleSide });
         const ringMesh = new THREE.Mesh(ringGeom, ringMat);
@@ -393,32 +491,32 @@
         // Drone / Aircraft group simulation
         const droneGroup = new THREE.Group();
         
-        // Tạo thân drone thon dài
+        // Co giãn trục X của SphereGeometry để tạo thân drone thon dài nằm ngang
         const bodyGeom = new THREE.SphereGeometry(0.22, 32, 16);
         const bodyMat = new THREE.MeshPhongMaterial({ color: 0xe2e8f0, shininess: 100 });
         const droneBody = new THREE.Mesh(bodyGeom, bodyMat);
-        droneBody.scale.set(1, 1, 2.2); 
+        droneBody.scale.set(2.2, 1, 1); // Trục dài nằm dọc theo Ox cục bộ
         droneGroup.add(droneBody);
 
-        // Rotors & Wings representations
-        const rotorWingGeom = new THREE.BoxGeometry(1.2, 0.05, 0.1);
+        // Rotors & Wings representations (Cánh quạt song song với XY)
+        const rotorWingGeom = new THREE.BoxGeometry(0.1, 1.2, 0.05);
         const rotorWingMat = new THREE.MeshPhongMaterial({ color: 0x475569 });
         const wing1 = new THREE.Mesh(rotorWingGeom, rotorWingMat);
-        wing1.position.set(0, 0, 0.15);
+        wing1.position.set(0, 0, 0.15); // Đặt nhẹ phía trên thân dọc trục Z
         droneGroup.add(wing1);
 
-        // Moving propeller rotor
-        const propellerGeom = new THREE.BoxGeometry(0.1, 0.02, 0.6);
+        // Propeller rotor spinning horizontally (around Z-axis)
+        const propellerGeom = new THREE.BoxGeometry(0.6, 0.1, 0.02);
         const propellerMat = new THREE.MeshBasicMaterial({ color: 0xff3b30 });
         const propeller = new THREE.Mesh(propellerGeom, propellerMat);
-        propeller.position.set(0, 0.1, 0.15);
+        propeller.position.set(0, 0, 0.18);
         droneGroup.add(propeller);
 
         scene.add(droneGroup);
 
         // Dynamic measurement line (YELLOW)
         const measureGeom = new THREE.BufferGeometry();
-        const measureMat = new THREE.LineBasicMaterial({ color: 0xfacc15, linewidth: 2 });
+        const measureMat = new THREE.LineBasicMaterial({ color: 0xfacc15, linewidth: 2.5 });
         const measureLine = new THREE.Line(measureGeom, measureMat);
         scene.add(measureLine);
 
@@ -441,13 +539,13 @@
             const P = new THREE.Vector3().lerpVectors(M, N, tVal);
             droneGroup.position.copy(P);
 
-            // Xoay drone theo hướng đường bay MN
+            // Xoay drone theo hướng đường bay MN trong mặt phẳng Oxy
             const directionVector = new THREE.Vector3().subVectors(N, M).normalize();
             const angle = Math.atan2(directionVector.y, directionVector.x);
             droneGroup.rotation.z = angle;
 
-            // Xoay cánh quạt
-            propeller.rotation.y += 0.5;
+            // Xoay cánh quạt theo trục thẳng đứng Z
+            propeller.rotation.z += 0.5;
 
             // Chiếu điểm P xuống Oxy -> P_proj(P.x, P.y, 0)
             const P_proj = new THREE.Vector3(P.x, P.y, 0);
@@ -510,6 +608,11 @@
 
                 tSlider.value = currentT;
                 tValDisplay.innerText = `t = ${currentT.toFixed(2)}`;
+            }
+
+            // Thực hiện tính năng tự động xoay quanh Oz nếu được bật
+            if (controls.autoRotate) {
+                controls.update();
             }
 
             updateDroneState(currentT);
@@ -626,9 +729,52 @@
                 } else if (viewType === 'top') {
                     smoothCameraFocus(new THREE.Vector3(8, 5, 0), new THREE.Vector3(8, 5, 22));
                 } else if (viewType === 'side') {
-                    smoothCameraFocus(new THREE.Vector3(8, 0, 2), new THREE.Vector3(8, -20, 2));
+                    smoothCameraFocus(new THREE.Vector3(8, 5, 2), new THREE.Vector3(8, -15, 2));
                 }
             });
+        });
+
+        // --- NEW: Camera Pad Action Handlers ---
+        const navButtons = document.querySelectorAll('.nav-btn');
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const dir = e.target.closest('button').dataset.dir;
+                rotateCamera(dir, 0.08);
+            });
+        });
+
+        function rotateCamera(direction, amount = 0.08) {
+            const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+            const spherical = new THREE.Spherical().setFromVector3(offset);
+            
+            if (direction === 'left') spherical.theta -= amount;
+            if (direction === 'right') spherical.theta += amount;
+            if (direction === 'up') spherical.phi = Math.max(0.1, Math.min(Math.PI / 2 - 0.05, spherical.phi - amount));
+            if (direction === 'down') spherical.phi = Math.max(0.1, Math.min(Math.PI / 2 - 0.05, spherical.phi + amount));
+            if (direction === 'zoomIn') spherical.radius = Math.max(controls.minDistance, spherical.radius - amount * 12);
+            if (direction === 'zoomOut') spherical.radius = Math.min(controls.maxDistance, spherical.radius + amount * 12);
+            
+            offset.setFromSpherical(spherical);
+            camera.position.copy(controls.target).add(offset);
+            controls.update();
+        }
+
+        // Auto rotate handlers
+        const autoRotateToggle = document.getElementById('auto-rotate-toggle');
+        const rotateSpeedSlider = document.getElementById('rotate-speed-slider');
+        const rotateSpeedVal = document.getElementById('rotate-speed-val');
+
+        controls.autoRotate = autoRotateToggle.checked;
+        controls.autoRotateSpeed = 2.0 * parseFloat(rotateSpeedSlider.value);
+
+        autoRotateToggle.addEventListener('change', (e) => {
+            controls.autoRotate = e.target.checked;
+        });
+
+        rotateSpeedSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            rotateSpeedVal.innerText = `${val.toFixed(1)}x`;
+            controls.autoRotateSpeed = 2.0 * val;
         });
 
         // Smooth camera helper (simple linear interpolation)
