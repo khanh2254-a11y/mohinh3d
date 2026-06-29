@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng 3D: Bài Toán Máy Bay & Vành Đai Bảo Vệ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar for control panel */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col overflow-hidden">
+
+    <!-- Header - Optimized for height saving -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 py-2.5 flex flex-wrap justify-between items-center z-10">
+        <div class="flex items-center space-x-3">
+            <div class="p-1.5 bg-indigo-600/20 text-indigo-400 rounded-lg border border-indigo-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-sm md:text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+                    MÔ PHỎNG HÌNH HỌC 3D <span class="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.2 rounded-full">Câu 3 (Mã đề 101)</span>
+                </h1>
+                <p class="text-[11px] text-slate-400">Trực quan hoá mối liên hệ khoảng cách từ máy bay đến vành đai bảo vệ</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4 mt-1 sm:mt-0">
+            <span class="text-[11px] text-slate-400 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Tỷ lệ: 1 đơn vị = 10m
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="flex-1 flex flex-col lg:flex-row relative overflow-hidden">
+        
+        <!-- Left Panel: Controls & Analysis (Shrunk from 420px to 320px for larger 3D space) -->
+        <div class="w-full lg:w-[320px] bg-slate-900/90 backdrop-blur-md border-r border-slate-800 flex flex-col z-10 max-h-[40vh] lg:max-h-[calc(100vh-55px)] overflow-y-auto">
+            
+            <!-- Tab Navigation -->
+            <div class="flex border-b border-slate-800 bg-slate-950/40">
+                <button id="tab-control-btn" class="flex-1 py-2.5 px-3 text-xs font-semibold text-indigo-400 border-b-2 border-indigo-500 bg-slate-900/20 focus:outline-none transition">
+                    Điều khiển & Số liệu
+                </button>
+                <button id="tab-math-btn" class="flex-1 py-2.5 px-3 text-xs font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200 hover:bg-slate-800/10 focus:outline-none transition">
+                    Lời giải & Đề bài
+                </button>
+            </div>
+
+            <!-- Tab Content: Controls & Info -->
+            <div id="tab-control-content" class="p-4 space-y-4 flex-1">
+                
+                <!-- Animation Control Section -->
+                <div class="bg-slate-950/50 rounded-xl p-3 border border-slate-800 space-y-3">
+                    <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        Trình điều khiển mô phỏng
+                    </h2>
+
+                    <!-- Play/Pause & Reset -->
+                    <div class="flex items-center justify-between gap-2">
+                        <button id="play-pause-btn" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium text-xs transition shadow-lg shadow-indigo-600/10 active:scale-95">
+                            <span id="play-icon" class="hidden">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </span>
+                            <span id="pause-icon">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            </span>
+                            <span id="play-text">Tạm dừng bay</span>
+                        </button>
+                        <button id="reset-btn" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-medium text-xs transition">
+                            Đặt lại (M)
+                        </button>
+                    </div>
+
+                    <!-- Progress Slider (t Parameter) -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[11px] font-medium text-slate-400">
+                            <span>Tiến trình quỹ đạo (t)</span>
+                            <span class="mono-font text-indigo-400" id="t-val-display">t = 0.33</span>
+                        </div>
+                        <input id="t-slider" type="range" min="0" max="1" step="0.001" value="0.333" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                        <div class="flex justify-between text-[9px] text-slate-500">
+                            <span>M(t=0)</span>
+                            <span>Q_min(t=1/3)</span>
+                            <span>N(t=1)</span>
+                        </div>
+                    </div>
+
+                    <!-- Speed Control -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-slate-400 font-medium">Tốc độ bay</label>
+                        <div class="grid grid-cols-3 gap-1">
+                            <button class="speed-btn py-1 text-[10px] font-semibold rounded bg-slate-800 text-slate-300 hover:bg-slate-700" data-speed="0.001">Chậm</button>
+                            <button class="speed-btn py-1 text-[10px] font-semibold rounded bg-indigo-600 text-white" data-speed="0.003">Thường</button>
+                            <button class="speed-btn py-1 text-[10px] font-semibold rounded bg-slate-800 text-slate-300 hover:bg-slate-700" data-speed="0.008">Nhanh</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Geometry Coords & Calculations -->
+                <div class="space-y-3">
+                    <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        Thông số thời gian thực
+                    </h2>
+
+                    <!-- Live Coordinate Cards (Optimized layout) -->
+                    <div class="flex flex-col gap-2">
+                        <div class="bg-slate-900 px-2.5 py-2 rounded-lg border border-slate-800 flex justify-between items-center">
+                            <span class="text-[9px] text-slate-400 font-medium">MÁY BAY P</span>
+                            <span id="coord-plane" class="text-[11px] font-bold text-emerald-400 mono-font">P(8.00; 6.00; 4.00)</span>
+                        </div>
+                        <div class="bg-slate-900 px-2.5 py-2 rounded-lg border border-slate-800 flex justify-between items-center">
+                            <span class="text-[9px] text-slate-400 font-medium">ĐIỂM GẦN NHẤT H</span>
+                            <span id="coord-ring" class="text-[11px] font-bold text-cyan-400 mono-font">H(5.60; 4.20; 0.00)</span>
+                        </div>
+                    </div>
+
+                    <!-- Distance Gauge -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-emerald-500/5 pointer-events-none"></div>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Khoảng Cách Thực Tế</span>
+                        <div class="flex items-baseline space-x-1">
+                            <span id="distance-meter" class="text-3xl font-extrabold text-white tracking-tight mono-font animate-pulse">50.0</span>
+                            <span class="text-base font-bold text-indigo-400">mét</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2.5 overflow-hidden">
+                            <div id="distance-progress-bar" class="bg-gradient-to-r from-emerald-400 to-indigo-500 h-1.5 rounded-full transition-all duration-100" style="width: 33%"></div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1.5">
+                            Trong Oxyz: <span id="distance-units" class="mono-font text-indigo-300 font-bold">5.0</span> đơn vị
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Camera Angle Presets -->
+                <div class="space-y-2">
+                    <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        Góc quan sát Camera
+                    </h2>
+                    <div class="grid grid-cols-3 gap-1">
+                        <button class="cam-btn py-1.5 text-[10px] font-medium rounded bg-slate-800 text-slate-300 hover:bg-slate-700" data-view="isometric">
+                            Mặc định
+                        </button>
+                        <button class="cam-btn py-1.5 text-[10px] font-medium rounded bg-slate-800 text-slate-300 hover:bg-slate-700" data-view="top">
+                            Từ trên (Oxy)
+                        </button>
+                        <button class="cam-btn py-1.5 text-[10px] font-medium rounded bg-slate-800 text-slate-300 hover:bg-slate-700" data-view="side">
+                            Mặt bên (Oxz)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Critical Positions Presets -->
+                <div class="space-y-2">
+                    <h2 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Điểm mốc quan trọng</h2>
+                    <div class="grid grid-cols-3 gap-1">
+                        <button class="preset-btn py-1.5 text-[10px] font-semibold rounded bg-slate-800 text-slate-300 hover:bg-indigo-600/30 hover:text-indigo-200 border border-slate-700" data-val="0">
+                            Điểm M
+                        </button>
+                        <button class="preset-btn py-1.5 text-[10px] font-semibold rounded bg-indigo-900/40 text-indigo-200 hover:bg-indigo-600/30 border border-indigo-500/30" data-val="0.3333">
+                            Điểm Q_min
+                        </button>
+                        <button class="preset-btn py-1.5 text-[10px] font-semibold rounded bg-slate-800 text-slate-300 hover:bg-indigo-600/30 hover:text-indigo-200 border border-slate-700" data-val="1">
+                            Điểm N
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Tab Content: Mathematical Background -->
+            <div id="tab-math-content" class="p-4 space-y-4 hidden flex-1">
+                <div class="space-y-3">
+                    <div class="border-l-4 border-amber-500 bg-amber-500/10 p-3 rounded-r-lg">
+                        <h3 class="text-xs font-bold text-amber-400 mb-0.5">ĐỀ BÀI CÂU 3</h3>
+                        <p class="text-[11px] leading-relaxed text-slate-300">
+                            Trong không gian hệ tọa độ $Oxyz$ (đơn vị tương ứng 10m thực tế). Vành đai bảo vệ quanh mục tiêu là đường tròn tâm $O$ bán kính $R = 7$ nằm trong mặt phẳng $(Oxy)$. Máy bay bay thẳng từ $M(5; 10; 4)$ đến $N(14; -2; 4)$.
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h3 class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">ĐÁNH GIÁ KHẲNG ĐỊNH:</h3>
+                        
+                        <div class="space-y-2 text-[11px]">
+                            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                                <p class="text-slate-300"><span class="text-emerald-400 font-bold">a) Đúng</span>: Vectơ chỉ phương $\overrightarrow{MN} = (9; -12; 0)$.</p>
+                            </div>
+                            
+                            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                                <p class="text-slate-300"><span class="text-red-400 font-bold">b) Sai</span>: Phương trình quỹ đạo có $z = 4$ (bay ở độ cao 40m cố định).</p>
+                            </div>
+
+                            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                                <p class="text-slate-300"><span class="text-emerald-400 font-bold">c) Đúng</span>: Khoảng cách ngắn nhất cực tiểu đạt đúng <strong class="text-yellow-400">50 mét</strong>.</p>
+                            </div>
+
+                            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                                <p class="text-slate-300"><span class="text-emerald-400 font-bold">d) Đúng</span>: Đạt cực tiểu tại vị trí điểm <strong class="text-indigo-400">Q(8; 6; 4)</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer of panel -->
+            <div class="p-3 border-t border-slate-800 bg-slate-950/40 text-[10px] text-slate-500 text-center">
+                Dùng chuột trái để xoay • chuột phải để kéo • cuộn để thu phóng
+            </div>
+        </div>
+
+        <!-- Right / Center: 3D Render Canvas - Expanded area -->
+        <div class="flex-1 min-h-[60vh] lg:min-h-0 h-full relative">
+            <div id="three-canvas-container" class="absolute inset-0 w-full h-full"></div>
+            
+            <!-- Quick Overlay HUD -->
+            <div class="absolute bottom-6 right-6 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-lg p-3 text-xs space-y-1.5 shadow-xl pointer-events-none z-10">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded bg-red-600 inline-block"></span>
+                    <span class="font-medium text-slate-200">Trục X (Đỏ)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded bg-green-600 inline-block"></span>
+                    <span class="font-medium text-slate-200">Trục Y (Xanh lá)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded bg-blue-600 inline-block"></span>
+                    <span class="font-medium text-slate-200">Trục Z (Xanh dương)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-1.5 rounded bg-cyan-400 inline-block"></span>
+                    <span class="font-medium text-slate-200">Vành đai (R=70m)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-0.5 rounded bg-amber-500 inline-block"></span>
+                    <span class="font-medium text-slate-200">Quỹ đạo MN</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-0.5 rounded bg-yellow-300 inline-block"></span>
+                    <span class="font-medium text-slate-200">K/c ngắn nhất (d)</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Initialization and Simulation Core script -->
+    <script>
+        // --- DATA STATE ---
+        const M = new THREE.Vector3(5, 10, 4);
+        const N = new THREE.Vector3(14, -2, 4);
+        const Q = new THREE.Vector3(8, 6, 4); // Điểm cực tiểu
+        const ringRadius = 7;
+        
+        let currentT = 0.3333; // Default at minimum position Q
+        let isPlaying = true;
+        let animationSpeed = 0.003;
+        let playDirection = 1;
+
+        // Dom Elements
+        const tSlider = document.getElementById('t-slider');
+        const tValDisplay = document.getElementById('t-val-display');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const playText = document.getElementById('play-text');
+        const resetBtn = document.getElementById('reset-btn');
+        const coordPlane = document.getElementById('coord-plane');
+        const coordRing = document.getElementById('coord-ring');
+        const distanceMeter = document.getElementById('distance-meter');
+        const distanceUnits = document.getElementById('distance-units');
+        const distanceProgressBar = document.getElementById('distance-progress-bar');
+        
+        // --- THREE.JS GRAPHICS SETUP ---
+        const container = document.getElementById('three-canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0f172a); // slate-900
+
+        // Nhận diện chiều rộng & chiều cao dự phòng (fallback)
+        let initWidth = container.clientWidth;
+        let initHeight = container.clientHeight;
+        if (!initWidth || !initHeight) {
+            initWidth = window.innerWidth - (window.innerWidth >= 1024 ? 320 : 0);
+            initHeight = window.innerHeight >= 1024 ? (window.innerHeight - 55) : (window.innerHeight * 0.6);
+        }
+
+        const camera = new THREE.PerspectiveCamera(45, initWidth / initHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(initWidth, initHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        // --- CẢI TIẾN ĐIỀU KHIỂN CHUỘT (ORBITCONTROLS OPTIMIZATION) ---
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;      // Đệm lực quán tính mượt mà
+        controls.rotateSpeed = 1.3;         // Tăng độ nhạy xoay trục bằng chuột trái
+        controls.zoomSpeed = 1.5;           // Tăng tốc độ cuộn chuột giữa để phóng to / thu nhỏ thoải mái hơn
+        controls.panSpeed = 1.0;            // Tốc độ di chuyển tịnh tiến bằng chuột phải
+        controls.enablePan = true;          // Kích hoạt kéo tự do (Chuột phải / Vuốt hai ngón tay trên điện thoại)
+        
+        // Giới hạn thu phóng để tránh lạc góc nhìn
+        controls.minDistance = 5;           // Không cho phép tiến quá sát lọt vào trong lòng vật thể
+        controls.maxDistance = 60;          // Không cho phép lùi ra quá xa biến mất mô hình
+        controls.maxPolarAngle = Math.PI / 2 - 0.01; // Không cho phép xoay camera chui xuống dưới lòng đất
+
+        // Căn lề mục tiêu camera mặc định
+        controls.target.set(8, 5, 2);
+        camera.position.set(16, 12, 18);
+        controls.update();
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(20, 40, 20);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // Grid & Coordinate Helper
+        const gridHelper = new THREE.GridHelper(30, 30, 0x334155, 0x1e293b);
+        gridHelper.rotation.x = Math.PI / 2; // Nằm phẳng trên mặt phẳng Oxy
+        scene.add(gridHelper);
+
+        // Arrows for Axes
+        const axisOrigin = new THREE.Vector3(0, 0, 0);
+        const arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), axisOrigin, 16, 0xef4444, 0.8, 0.25);
+        const arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), axisOrigin, 16, 0x22c55e, 0.8, 0.25);
+        const arrowZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), axisOrigin, 10, 0x3b82f6, 0.8, 0.25);
+        scene.add(arrowX);
+        scene.add(arrowY);
+        scene.add(arrowZ);
+
+        // Protective ring mesh (Vành đai bảo vệ)
+        const ringGeom = new THREE.RingGeometry(ringRadius - 0.06, ringRadius + 0.06, 128);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee, side: THREE.DoubleSide });
+        const ringMesh = new THREE.Mesh(ringGeom, ringMat);
+        scene.add(ringMesh);
+
+        // Highlight ring zone (slightly transparent face inside)
+        const ringZoneGeom = new THREE.CircleGeometry(ringRadius, 64);
+        const ringZoneMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.1, side: THREE.DoubleSide });
+        const ringZoneMesh = new THREE.Mesh(ringZoneGeom, ringZoneMat);
+        scene.add(ringZoneMesh);
+
+        // Path Line MN
+        const pathGeom = new THREE.BufferGeometry().setFromPoints([M, N]);
+        const pathMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, linewidth: 2 });
+        const pathLine = new THREE.Line(pathGeom, pathMat);
+        scene.add(pathLine);
+
+        // Markers for M, N, Q points
+        const markerGeom = new THREE.SphereGeometry(0.2, 16, 16);
+        const markerMatM = new THREE.MeshPhongMaterial({ color: 0xf97316, emissive: 0x541c0c });
+        const markerMatN = new THREE.MeshPhongMaterial({ color: 0xf97316, emissive: 0x541c0c });
+        const markerMatQ = new THREE.MeshPhongMaterial({ color: 0xe11d48, emissive: 0x4c0519 });
+
+        const sphereM = new THREE.Mesh(markerGeom, markerMatM); sphereM.position.copy(M); scene.add(sphereM);
+        const sphereN = new THREE.Mesh(markerGeom, markerMatN); sphereN.position.copy(N); scene.add(sphereN);
+        const sphereQ = new THREE.Mesh(markerGeom, markerMatQ); sphereQ.position.copy(Q); scene.add(sphereQ);
+
+        // Drone / Aircraft group simulation
+        const droneGroup = new THREE.Group();
+        
+        // Tạo thân drone thon dài
+        const bodyGeom = new THREE.SphereGeometry(0.22, 32, 16);
+        const bodyMat = new THREE.MeshPhongMaterial({ color: 0xe2e8f0, shininess: 100 });
+        const droneBody = new THREE.Mesh(bodyGeom, bodyMat);
+        droneBody.scale.set(1, 1, 2.2); 
+        droneGroup.add(droneBody);
+
+        // Rotors & Wings representations
+        const rotorWingGeom = new THREE.BoxGeometry(1.2, 0.05, 0.1);
+        const rotorWingMat = new THREE.MeshPhongMaterial({ color: 0x475569 });
+        const wing1 = new THREE.Mesh(rotorWingGeom, rotorWingMat);
+        wing1.position.set(0, 0, 0.15);
+        droneGroup.add(wing1);
+
+        // Moving propeller rotor
+        const propellerGeom = new THREE.BoxGeometry(0.1, 0.02, 0.6);
+        const propellerMat = new THREE.MeshBasicMaterial({ color: 0xff3b30 });
+        const propeller = new THREE.Mesh(propellerGeom, propellerMat);
+        propeller.position.set(0, 0.1, 0.15);
+        droneGroup.add(propeller);
+
+        scene.add(droneGroup);
+
+        // Dynamic measurement line (YELLOW)
+        const measureGeom = new THREE.BufferGeometry();
+        const measureMat = new THREE.LineBasicMaterial({ color: 0xfacc15, linewidth: 2 });
+        const measureLine = new THREE.Line(measureGeom, measureMat);
+        scene.add(measureLine);
+
+        // Dotted altitude helper line from Plane straight down to Oxy plane
+        const altitudeGeom = new THREE.BufferGeometry();
+        const altitudeMat = new THREE.LineBasicMaterial({ color: 0x64748b, linewidth: 1 });
+        const altitudeLine = new THREE.Line(altitudeGeom, altitudeMat);
+        scene.add(altitudeLine);
+
+        // Projection point at base Oxy plane
+        const projGeom = new THREE.SphereGeometry(0.1, 8, 8);
+        const projMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8 });
+        const projSphere = new THREE.Mesh(projGeom, projMat);
+        scene.add(projSphere);
+
+
+        // --- DYNAMIC GEOMETRY LOGIC & UPDATE ---
+        function updateDroneState(tVal) {
+            // Calculate current plane coordinate: P(t) = M + t * (N - M)
+            const P = new THREE.Vector3().lerpVectors(M, N, tVal);
+            droneGroup.position.copy(P);
+
+            // Xoay drone theo hướng đường bay MN
+            const directionVector = new THREE.Vector3().subVectors(N, M).normalize();
+            const angle = Math.atan2(directionVector.y, directionVector.x);
+            droneGroup.rotation.z = angle;
+
+            // Xoay cánh quạt
+            propeller.rotation.y += 0.5;
+
+            // Chiếu điểm P xuống Oxy -> P_proj(P.x, P.y, 0)
+            const P_proj = new THREE.Vector3(P.x, P.y, 0);
+            projSphere.position.copy(P_proj);
+
+            // Vẽ đường phụ trợ cao độ
+            altitudeGeom.setFromPoints([P, P_proj]);
+
+            // Tìm điểm gần nhất H trên vành đai tròn
+            const distOP_proj = Math.sqrt(P_proj.x * P_proj.x + P_proj.y * P_proj.y);
+            const H = new THREE.Vector3(
+                ringRadius * (P.x / distOP_proj),
+                ringRadius * (P.y / distOP_proj),
+                0
+            );
+
+            // Cập nhật đường đo lường màu vàng
+            measureGeom.setFromPoints([P, H]);
+
+            // Tính toán khoảng cách
+            const geomDistance = P.distanceTo(H);
+            const physicalDistanceMeters = geomDistance * 10; // 1 đơn vị = 10m
+
+            // Cập nhật giao diện UI văn bản
+            coordPlane.innerHTML = `P(${P.x.toFixed(2)}; ${P.y.toFixed(2)}; ${P.z.toFixed(2)})`;
+            coordRing.innerHTML = `H(${H.x.toFixed(2)}; ${H.y.toFixed(2)}; ${H.z.toFixed(2)})`;
+            distanceMeter.innerText = physicalDistanceMeters.toFixed(1);
+            distanceUnits.innerText = geomDistance.toFixed(2);
+
+            // Cập nhật thanh tiến trình khoảng cách
+            const progressPct = Math.min((physicalDistanceMeters / 150) * 100, 100);
+            distanceProgressBar.style.width = `${progressPct}%`;
+
+            // Thay đổi màu sắc cảnh báo khi máy bay đạt cực cận
+            if (physicalDistanceMeters <= 50.1) {
+                distanceProgressBar.style.background = '#f43f5e'; // Rose-500
+                distanceMeter.style.color = '#ef4444'; // Red alert
+            } else {
+                distanceProgressBar.style.background = 'linear-gradient(to right, #34d399, #6366f1)';
+                distanceMeter.style.color = '#ffffff';
+            }
+        }
+
+
+        // --- ANIMATION MAIN LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isPlaying) {
+                currentT += animationSpeed * playDirection;
+
+                // Di chuyển tuần hoàn giữa M và N (Ping-pong)
+                if (currentT >= 1) {
+                    currentT = 1;
+                    playDirection = -1;
+                } else if (currentT <= 0) {
+                    currentT = 0;
+                    playDirection = 1;
+                }
+
+                tSlider.value = currentT;
+                tValDisplay.innerText = `t = ${currentT.toFixed(2)}`;
+            }
+
+            updateDroneState(currentT);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+
+        // --- EVENT HANDLERS ---
+
+        // Tab Navigation
+        const tabControlBtn = document.getElementById('tab-control-btn');
+        const tabMathBtn = document.getElementById('tab-math-btn');
+        const tabControlContent = document.getElementById('tab-control-content');
+        const tabMathContent = document.getElementById('tab-math-content');
+
+        tabControlBtn.addEventListener('click', () => {
+            tabControlBtn.classList.add('text-indigo-400', 'border-indigo-500');
+            tabControlBtn.classList.remove('text-slate-400', 'border-transparent');
+            tabMathBtn.classList.remove('text-indigo-400', 'border-indigo-500');
+            tabMathBtn.classList.add('text-slate-400', 'border-transparent');
+            tabControlContent.classList.remove('hidden');
+            tabMathContent.classList.add('hidden');
+        });
+
+        tabMathBtn.addEventListener('click', () => {
+            tabMathBtn.classList.add('text-indigo-400', 'border-indigo-500');
+            tabMathBtn.classList.remove('text-slate-400', 'border-transparent');
+            tabControlBtn.classList.remove('text-indigo-400', 'border-indigo-500');
+            tabControlBtn.classList.add('text-slate-400', 'border-transparent');
+            tabMathContent.classList.remove('hidden');
+            tabControlContent.classList.add('hidden');
+        });
+
+        // Slider interaction
+        tSlider.addEventListener('input', (e) => {
+            isPlaying = false; // Tạm dừng chuyển động khi kéo tay
+            updatePlayPauseButtonUI();
+            currentT = parseFloat(e.target.value);
+            tValDisplay.innerText = `t = ${currentT.toFixed(2)}`;
+            updateDroneState(currentT);
+        });
+
+        // Play/Pause button interaction
+        playPauseBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            updatePlayPauseButtonUI();
+        });
+
+        function updatePlayPauseButtonUI() {
+            if (isPlaying) {
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                playText.innerText = "Tạm dừng bay";
+                playPauseBtn.className = "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium text-xs transition shadow-lg shadow-indigo-600/10 active:scale-95";
+            } else {
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                playText.innerText = "Tiếp tục bay";
+                playPauseBtn.className = "flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-xs transition shadow-lg shadow-emerald-600/10 active:scale-95";
+            }
+        }
+
+        // Reset Button
+        resetBtn.addEventListener('click', () => {
+            isPlaying = false;
+            updatePlayPauseButtonUI();
+            currentT = 0;
+            tSlider.value = 0;
+            tValDisplay.innerText = `t = 0.00`;
+            updateDroneState(0);
+        });
+
+        // Speed buttons
+        const speedButtons = document.querySelectorAll('.speed-btn');
+        speedButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                speedButtons.forEach(b => b.className = "speed-btn py-1 text-[10px] font-semibold rounded bg-slate-800 text-slate-300 hover:bg-slate-700");
+                e.target.className = "speed-btn py-1 text-[10px] font-semibold rounded bg-indigo-600 text-white";
+                animationSpeed = parseFloat(e.target.dataset.speed);
+            });
+        });
+
+        // Presets for specific critical points
+        const presetButtons = document.querySelectorAll('.preset-btn');
+        presetButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                isPlaying = false;
+                updatePlayPauseButtonUI();
+                currentT = parseFloat(e.target.dataset.val);
+                tSlider.value = currentT;
+                tValDisplay.innerText = `t = ${currentT.toFixed(2)}`;
+                updateDroneState(currentT);
+
+                // Smooth camera focus based on selected preset
+                if (currentT === 0) { // Point M
+                    smoothCameraFocus(new THREE.Vector3(5, 10, 4), new THREE.Vector3(12, 16, 12));
+                } else if (currentT > 0.3 && currentT < 0.35) { // Point Q
+                    smoothCameraFocus(new THREE.Vector3(8, 6, 4), new THREE.Vector3(14, 10, 10));
+                } else { // Point N
+                    smoothCameraFocus(new THREE.Vector3(14, -2, 4), new THREE.Vector3(20, 4, 12));
+                }
+            });
+        });
+
+        // Camera Views Controls
+        const camButtons = document.querySelectorAll('.cam-btn');
+        camButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const viewType = e.target.closest('button').dataset.view;
+                
+                if (viewType === 'isometric') {
+                    smoothCameraFocus(new THREE.Vector3(8, 5, 2), new THREE.Vector3(16, 12, 18));
+                } else if (viewType === 'top') {
+                    smoothCameraFocus(new THREE.Vector3(8, 5, 0), new THREE.Vector3(8, 5, 22));
+                } else if (viewType === 'side') {
+                    smoothCameraFocus(new THREE.Vector3(8, 0, 2), new THREE.Vector3(8, -20, 2));
+                }
+            });
+        });
+
+        // Smooth camera helper (simple linear interpolation)
+        function smoothCameraFocus(targetPos, cameraPos) {
+            let duration = 30; // Frames
+            let currentFrame = 0;
+            const startTarget = controls.target.clone();
+            const startCam = camera.position.clone();
+
+            function interpolate() {
+                currentFrame++;
+                const ratio = currentFrame / duration;
+                
+                controls.target.lerpVectors(startTarget, targetPos, ratio);
+                camera.position.lerpVectors(startCam, cameraPos, ratio);
+
+                if (currentFrame < duration) {
+                    requestAnimationFrame(interpolate);
+                }
+            }
+            interpolate();
+        }
+
+        // Trình xử lý resize thông minh tự động đọc chính xác không gian hiển thị thực tế
+        window.addEventListener('resize', () => {
+            const w = container.clientWidth || (window.innerWidth - (window.innerWidth >= 1024 ? 320 : 0));
+            const h = container.clientHeight || (window.innerHeight >= 1024 ? (window.innerHeight - 55) : (window.innerHeight * 0.6));
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+
+        // Buộc trình duyệt cập nhật lại layout kích thước ngay sau khi hoàn thành chu kỳ render đầu tiên
+        setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+        }, 120);
+
+        // --- START SIMULATION ---
+        updateDroneState(currentT);
+        animate();
+    </script>
+</body>
+</html>
